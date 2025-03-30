@@ -1,6 +1,9 @@
-# Scene Recognition
+# Context-Aware Dynamic Integration for Scene Recognition
 
-A project for training and evaluating scene recognition models.
+[Chan Ho Bae](None), [Sangtae Ahn](https://knu-brainai.github.io/)
+
+# Introduction
+This repository contains the official implementation of **Context-Aware Dynamic Integration for Scene Recognition**.
 
 ## Project Structure
 
@@ -60,4 +63,4 @@ The project uses the SUN397 dataset. Data is organized as follows:
 - Training images: `data/SUN397_split/train/`
 - Training tags: `data/SUN397_split/train_tags.csv`
 - Validation images: `data/SUN397_split/val/`
-- Validation tags: `data/SUN397_split/val_tags.csv` 
+- Validation tags: `data/SUN397_split/val_tags.csv`
