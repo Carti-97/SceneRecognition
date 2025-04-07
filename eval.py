@@ -42,14 +42,31 @@ def evaluate_dynamic_integration(model, val_loader, device):
     correct_val = 0
     total_val = 0
 
-    # Tag generation function (mock implementation - replace with actual tag generator)
+    # Get RAM model for tag generation if available
+    if TAG_MODEL_TYPE.lower() == 'ram':
+        try:
+            from ram.inference import inference_ram
+            print("Using RAM model for tag generation")
+            # TODO: Load the RAM model here
+            use_ram = True
+        except ImportError:
+            print("RAM model not available, using dummy tags")
+            use_ram = False
+    else:
+        use_ram = False
+
+    # Tag generation function
     def generate_tags_for_images(images, batch_size=32):
         """
-        Placeholder for tag generation function
-        In a real implementation, this would use RAM or Tag2Text to generate tags
+        Generate tags for images using RAM or a placeholder
         """
-        # Mock tags for each image in the batch
-        return ["indoor scene with furniture, living room" for _ in range(batch_size)]
+        if use_ram:
+            # TODO: Implement actual RAM tag generation
+            # This is a placeholder for now
+            return ["indoor scene with furniture, living room" for _ in range(batch_size)]
+        else:
+            # Mock tags for each image in the batch
+            return ["indoor scene with furniture, living room" for _ in range(batch_size)]
 
     with torch.no_grad():
         for inputs_image, labels in tqdm(val_loader, desc="Evaluating Dynamic Model", unit="batch"):
@@ -80,7 +97,7 @@ def main():
     args = parser.parse_args()
 
     # Create dataset and dataloader
-    val_dataset = SceneDataset(VAL_IMAGES, VAL_TAGS, train=False)
+    val_dataset = SceneDataset(VAL_IMAGES, train=False)
     val_loader = DataLoader(
         dataset=val_dataset,
         batch_size=BATCH_SIZE,

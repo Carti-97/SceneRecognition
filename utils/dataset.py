@@ -3,50 +3,35 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.transforms import v2
 from PIL import Image
-import pandas as pd
 import os
+import glob
 
-# ImageNet normalization values for pretrained models
-MEAN = [0.485, 0.456, 0.406]
-STD = [0.229, 0.224, 0.225]
+from config import MEAN, STD
 
 class SceneDataset(Dataset):
     """
     Dataset class for scene recognition datasets (SUN397, MIT Indoor67)
     """
-    def __init__(self, image_dir, tags_csv, train=True):
+    def __init__(self, image_dir, train=True):
         self.image_dir = image_dir
-        self.tags_df = pd.read_csv(tags_csv)
         
-        # Extract image paths and tags from CSV file
-        self.image_paths = self.tags_df['image_path'].tolist()
-        self.tags = self.tags_df['tag'].tolist()
+        # Find all image files in the directory
+        self.image_extensions = ['.jpg', '.jpeg', '.png']
+        self.image_paths = []
         
-        # Handle relative or absolute paths in the CSV
-        self.full_image_paths = []
-        for path in self.image_paths:
-            if os.path.isabs(path):
-                self.full_image_paths.append(path)
-            else:
-                # Handle relative paths in the CSV
-                # First check if path contains subdirectories
-                if os.path.dirname(path):
-                    # If path already contains subdirectories like 'train/class/image.jpg'
-                    self.full_image_paths.append(os.path.join(os.path.dirname(image_dir), path))
-                else:
-                    # If path is just a filename
-                    self.full_image_paths.append(os.path.join(image_dir, path))
+        # Get all image files recursively from directory
+        for root, _, files in os.walk(image_dir):
+            for file in files:
+                if any(file.lower().endswith(ext) for ext in self.image_extensions):
+                    self.image_paths.append(os.path.join(root, file))
         
-        # Get class labels
-        if 'class' in self.tags_df.columns:
-            # If CSV has class column, use it directly
-            self.labels = self.tags_df['class'].tolist()
-        else:
-            # Otherwise infer labels from image paths
-            self.labels = [os.path.basename(os.path.dirname(path)) for path in self.full_image_paths]
+        # Get class labels from directory structure
+        # Assumes image_dir/class_name/image.jpg structure
+        self.labels = [os.path.basename(os.path.dirname(path)) for path in self.image_paths]
         
         # Create label to index mapping
-        self.label_to_index = {label: idx for idx, label in enumerate(sorted(set(self.labels)))}
+        self.classes = sorted(list(set(self.labels)))
+        self.label_to_index = {label: idx for idx, label in enumerate(self.classes)}
         
         # Create appropriate transforms
         if train:
@@ -71,12 +56,11 @@ class SceneDataset(Dataset):
             ])
 
     def __len__(self):
-        return len(self.full_image_paths)
+        return len(self.image_paths)
 
     def __getitem__(self, idx):
-        image_path = self.full_image_paths[idx]
+        image_path = self.image_paths[idx]
         label = self.labels[idx]
-        tag = self.tags[idx] if idx < len(self.tags) else ""
         
         # Load and convert image
         try:

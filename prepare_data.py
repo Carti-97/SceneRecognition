@@ -12,7 +12,6 @@ import urllib.request
 import tarfile
 import zipfile
 from tqdm import tqdm
-import pandas as pd
 import random
 import csv
 
@@ -93,27 +92,7 @@ def prepare_sun397(data_dir):
                 if os.path.isdir(class_path) and len(os.listdir(class_path)) > 0:
                     class_dirs.append((dir_name, class_path))
     
-    # Create train/val/test splits and generate CSV files
-    train_csv_path = os.path.join(data_dir, 'sun397', 'train_tags.csv')
-    val_csv_path = os.path.join(data_dir, 'sun397', 'val_tags.csv')
-    test_csv_path = os.path.join(data_dir, 'sun397', 'test_tags.csv')
-    
-    # Create CSV files
-    train_csv = open(train_csv_path, 'w', newline='')
-    val_csv = open(val_csv_path, 'w', newline='')
-    test_csv = open(test_csv_path, 'w', newline='')
-    
-    train_writer = csv.writer(train_csv)
-    val_writer = csv.writer(val_csv)
-    test_writer = csv.writer(test_csv)
-    
-    # Write CSV headers
-    headers = ['image_path', 'tag', 'class']
-    train_writer.writerow(headers)
-    val_writer.writerow(headers)
-    test_writer.writerow(headers)
-    
-    print("Creating SUN397 dataset splits and generating tags...")
+    print("Creating SUN397 dataset splits...")
     for class_name, class_path in tqdm(class_dirs, desc="Processing SUN397 classes"):
         # Create class directories in train/val/test
         os.makedirs(os.path.join(sun_train_dir, class_name), exist_ok=True)
@@ -132,51 +111,28 @@ def prepare_sun397(data_dir):
         val_images = image_files[n_train:n_train+n_val]
         test_images = image_files[n_train+n_val:]
         
-        # Format class name for tag (replace underscores with spaces)
-        tag = class_name.replace('_', ' ')
-        
         # Process train images
         for img_file in train_images:
             src_path = os.path.join(class_path, img_file)
             dst_path = os.path.join(sun_train_dir, class_name, img_file)
             shutil.copy2(src_path, dst_path)
-            
-            # Write to CSV
-            rel_path = os.path.join('train', class_name, img_file)
-            train_writer.writerow([rel_path, tag, class_name])
         
         # Process validation images
         for img_file in val_images:
             src_path = os.path.join(class_path, img_file)
             dst_path = os.path.join(sun_val_dir, class_name, img_file)
             shutil.copy2(src_path, dst_path)
-            
-            # Write to CSV
-            rel_path = os.path.join('val', class_name, img_file)
-            val_writer.writerow([rel_path, tag, class_name])
         
         # Process test images
         for img_file in test_images:
             src_path = os.path.join(class_path, img_file)
             dst_path = os.path.join(sun_test_dir, class_name, img_file)
             shutil.copy2(src_path, dst_path)
-            
-            # Write to CSV
-            rel_path = os.path.join('test', class_name, img_file)
-            test_writer.writerow([rel_path, tag, class_name])
-    
-    # Close CSV files
-    train_csv.close()
-    val_csv.close()
-    test_csv.close()
     
     print(f"SUN397 dataset prepared in {os.path.join(data_dir, 'sun397')}")
     print(f"- Train images: {os.path.join(data_dir, 'sun397', 'train')}")
     print(f"- Validation images: {os.path.join(data_dir, 'sun397', 'val')}")
     print(f"- Test images: {os.path.join(data_dir, 'sun397', 'test')}")
-    print(f"- Train tags: {train_csv_path}")
-    print(f"- Validation tags: {val_csv_path}")
-    print(f"- Test tags: {test_csv_path}")
 
 def prepare_indoor67(data_dir):
     """Prepare MIT Indoor67 dataset"""
@@ -206,27 +162,7 @@ def prepare_indoor67(data_dir):
     class_dirs = [(d, os.path.join(Images_dir, d)) for d in os.listdir(Images_dir) 
                   if os.path.isdir(os.path.join(Images_dir, d))]
     
-    # Create train/val/test splits and generate CSV files
-    train_csv_path = os.path.join(data_dir, 'indoor67', 'train_tags.csv')
-    val_csv_path = os.path.join(data_dir, 'indoor67', 'val_tags.csv')
-    test_csv_path = os.path.join(data_dir, 'indoor67', 'test_tags.csv')
-    
-    # Create CSV files
-    train_csv = open(train_csv_path, 'w', newline='')
-    val_csv = open(val_csv_path, 'w', newline='')
-    test_csv = open(test_csv_path, 'w', newline='')
-    
-    train_writer = csv.writer(train_csv)
-    val_writer = csv.writer(val_csv)
-    test_writer = csv.writer(test_csv)
-    
-    # Write CSV headers
-    headers = ['image_path', 'tag', 'class']
-    train_writer.writerow(headers)
-    val_writer.writerow(headers)
-    test_writer.writerow(headers)
-    
-    print("Creating MIT Indoor67 dataset splits and generating tags...")
+    print("Creating MIT Indoor67 dataset splits...")
     for class_name, class_path in tqdm(class_dirs, desc="Processing Indoor67 classes"):
         # Create class directories in train/val/test
         os.makedirs(os.path.join(indoor_train_dir, class_name), exist_ok=True)
@@ -245,51 +181,28 @@ def prepare_indoor67(data_dir):
         val_images = image_files[n_train:n_train+n_val]
         test_images = image_files[n_train+n_val:]
         
-        # Format class name for tag (replace underscores with spaces)
-        tag = class_name.replace('_', ' ')
-        
         # Process train images
         for img_file in train_images:
             src_path = os.path.join(class_path, img_file)
             dst_path = os.path.join(indoor_train_dir, class_name, img_file)
             shutil.copy2(src_path, dst_path)
-            
-            # Write to CSV
-            rel_path = os.path.join('train', class_name, img_file)
-            train_writer.writerow([rel_path, tag, class_name])
         
         # Process validation images
         for img_file in val_images:
             src_path = os.path.join(class_path, img_file)
             dst_path = os.path.join(indoor_val_dir, class_name, img_file)
             shutil.copy2(src_path, dst_path)
-            
-            # Write to CSV
-            rel_path = os.path.join('val', class_name, img_file)
-            val_writer.writerow([rel_path, tag, class_name])
         
         # Process test images
         for img_file in test_images:
             src_path = os.path.join(class_path, img_file)
             dst_path = os.path.join(indoor_test_dir, class_name, img_file)
             shutil.copy2(src_path, dst_path)
-            
-            # Write to CSV
-            rel_path = os.path.join('test', class_name, img_file)
-            test_writer.writerow([rel_path, tag, class_name])
-    
-    # Close CSV files
-    train_csv.close()
-    val_csv.close()
-    test_csv.close()
     
     print(f"MIT Indoor67 dataset prepared in {os.path.join(data_dir, 'indoor67')}")
     print(f"- Train images: {os.path.join(data_dir, 'indoor67', 'train')}")
     print(f"- Validation images: {os.path.join(data_dir, 'indoor67', 'val')}")
     print(f"- Test images: {os.path.join(data_dir, 'indoor67', 'test')}")
-    print(f"- Train tags: {train_csv_path}")
-    print(f"- Validation tags: {val_csv_path}")
-    print(f"- Test tags: {test_csv_path}")
 
 def main():
     parser = argparse.ArgumentParser(description='Prepare scene recognition datasets')

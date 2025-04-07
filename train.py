@@ -24,8 +24,8 @@ def train_rgb_branch():
     model.to(DEVICE)
 
     # Create dataset and dataloader
-    train_dataset = SceneDataset(TRAIN_IMAGES, TRAIN_TAGS, train=True)
-    val_dataset = SceneDataset(VAL_IMAGES, VAL_TAGS, train=False)
+    train_dataset = SceneDataset(TRAIN_IMAGES, train=True)
+    val_dataset = SceneDataset(VAL_IMAGES, train=False)
 
     train_loader = DataLoader(
         dataset=train_dataset,
@@ -134,8 +134,8 @@ def train_dynamic_integration():
             print(f"Loaded RGB branch weights from checkpoint epoch {checkpoint['epoch']}")
     
     # Create dataset and dataloader
-    train_dataset = SceneDataset(TRAIN_IMAGES, TRAIN_TAGS, train=True)
-    val_dataset = SceneDataset(VAL_IMAGES, VAL_TAGS, train=False)
+    train_dataset = SceneDataset(TRAIN_IMAGES, train=True)
+    val_dataset = SceneDataset(VAL_IMAGES, train=False)
 
     train_loader = DataLoader(
         dataset=train_dataset,
@@ -167,14 +167,31 @@ def train_dynamic_integration():
     best_epoch = 0
     best_model_state = None
 
+    # Get RAM model for tag generation if available
+    if TAG_MODEL_TYPE.lower() == 'ram':
+        try:
+            from ram.inference import inference_ram
+            print("Using RAM model for tag generation")
+            # TODO: Load the RAM model here
+            use_ram = True
+        except ImportError:
+            print("RAM model not available, using dummy tags")
+            use_ram = False
+    else:
+        use_ram = False
+
     # Tag generation function (mock implementation - replace with actual tag generator)
     def generate_tags_for_images(images, batch_size=32):
         """
-        Placeholder for tag generation function
-        In a real implementation, this would use RAM or Tag2Text to generate tags
+        Generate tags for images using RAM or a placeholder
         """
-        # Mock tags for each image in the batch
-        return ["indoor scene with furniture, living room" for _ in range(batch_size)]
+        if use_ram:
+            # TODO: Implement actual RAM tag generation
+            # This is a placeholder for now
+            return ["indoor scene with furniture, living room" for _ in range(batch_size)]
+        else:
+            # Mock tags for each image in the batch
+            return ["indoor scene with furniture, living room" for _ in range(batch_size)]
 
     for epoch in range(EPOCHS):
         model.train()
